@@ -3,79 +3,40 @@
 import { Star, Clock } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
-import { useState } from "react";
 import { Email } from "@/lib/types";
 
 interface EmailItemProps {
   email: Email;
   onClick: () => void;
+  isSelected?: boolean;
 }
 
-export function EmailItem({ email, onClick }: EmailItemProps) {
-  const [isStarred, setIsStarred] = useState(email.starred);
-  const [isChecked, setIsChecked] = useState(false);
-
+export function EmailItem({ email, onClick, isSelected }: EmailItemProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.2 }}
+    <div
       onClick={onClick}
       className={cn(
         "group flex cursor-pointer gap-4 border-b p-4 transition-all hover:bg-accent/50",
-        email.unread && "bg-muted/30"
+        email.unread && "bg-muted/30",
+        isSelected && "bg-accent"
       )}
     >
       <div className="flex items-center gap-3">
-        <Checkbox
-          checked={isChecked}
-          onCheckedChange={(checked) => {
-            setIsChecked(checked as boolean);
-          }}
-          onClick={(e) => e.stopPropagation()}
-        />
-
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <Avatar className="h-10 w-10 shrink-0 cursor-pointer">
-              <AvatarFallback
-                className={cn(
-                  "text-xs font-semibold",
-                  email.category === "promotions" &&
-                    "bg-chart-4 text-chart-4-foreground",
-                  email.category === "social" &&
-                    "bg-chart-2 text-chart-2-foreground",
-                  email.category === "inbox" &&
-                    "bg-primary text-primary-foreground"
-                )}
-              >
-                {email.avatar}
-              </AvatarFallback>
-            </Avatar>
-          </HoverCardTrigger>
-          <HoverCardContent className="w-80">
-            <div className="space-y-2">
-              <h4 className="font-semibold">{email.from}</h4>
-              <p className="text-sm text-muted-foreground">{email.email}</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant="outline" className="capitalize">
-                  {email.category}
-                </Badge>
-              </div>
-            </div>
-          </HoverCardContent>
-        </HoverCard>
+        <Avatar className="h-10 w-10 shrink-0">
+          <AvatarFallback
+            className={cn(
+              "text-xs font-semibold",
+              email.category === "promotions" &&
+                "bg-orange-100 text-orange-700",
+              email.category === "social" && "bg-blue-100 text-blue-700",
+              email.category === "inbox" && "bg-primary text-primary-foreground"
+            )}
+          >
+            {email.avatar}
+          </AvatarFallback>
+        </Avatar>
       </div>
 
       <div className="flex-1 space-y-1 overflow-hidden">
@@ -83,22 +44,16 @@ export function EmailItem({ email, onClick }: EmailItemProps) {
           <div className="flex items-center gap-2">
             <p
               className={cn(
-                "text-sm font-medium",
+                "text-sm font-medium truncate",
                 email.unread && "font-semibold"
               )}
             >
               {email.from}
             </p>
             {email.unread && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 500 }}
-              >
-                <Badge variant="default" className="h-5 px-1.5 text-xs">
-                  New
-                </Badge>
-              </motion.div>
+              <Badge variant="default" className="h-5 px-1.5 text-xs">
+                New
+              </Badge>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -106,31 +61,13 @@ export function EmailItem({ email, onClick }: EmailItemProps) {
               <Clock className="h-3 w-3" />
               {formatDistanceToNow(email.date, { addSuffix: true })}
             </div>
-            <motion.button
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
-              className={cn(
-                "opacity-0 transition-opacity group-hover:opacity-100",
-                isStarred && "opacity-100"
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsStarred(!isStarred);
-              }}
-            >
-              <Star
-                className={cn(
-                  "h-4 w-4 transition-colors",
-                  isStarred
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-muted-foreground hover:text-yellow-400"
-                )}
-              />
-            </motion.button>
+            {email.starred && (
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            )}
           </div>
         </div>
 
-        <p className={cn("text-sm", email.unread && "font-medium")}>
+        <p className={cn("text-sm truncate", email.unread && "font-medium")}>
           {email.subject}
         </p>
 
@@ -138,6 +75,6 @@ export function EmailItem({ email, onClick }: EmailItemProps) {
           {email.snippet}
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 }
